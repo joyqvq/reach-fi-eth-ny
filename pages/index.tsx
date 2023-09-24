@@ -18,7 +18,7 @@ import {
 } from "@web3inbox/widget-react";
 import "@web3inbox/widget-react/dist/compiled.css";
 
-import { useAccount, usePublicClient, useSignMessage } from "wagmi";
+import { useAccount, useContractWrite, usePrepareContractWrite, usePublicClient, useSignMessage } from "wagmi";
 import { FaBell, FaBellSlash, FaPause, FaPlay } from "react-icons/fa";
 import { BsPersonFillCheck, BsSendFill } from "react-icons/bs";
 import useSendNotification from "../utils/useSendNotification";
@@ -28,6 +28,15 @@ import Messages from "../components/Messages";
 import Subscription from "../components/Subscription";
 import { sendNotification } from "../utils/fetchNotify";
 import Subscribers from "../components/Subscribers";
+import { BigNumber } from 'ethers'
+import { decode } from './lib/wld'
+// import { ConnectKitButton } from 'connectkit'
+import { IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
+import ReachContractAbi from './abi/ReachContract.abi'
+
+function decodeToBigintArray(data: [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]): [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] {
+	return data.map((bigNumberValue) => bigNumberValue.toBigInt()) as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+}
 
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as string;
 const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN as string;
@@ -158,97 +167,140 @@ const Home: NextPage = () => {
     handleBlockNotification();
   }, 12000);
 
+  const [proof, setProof] = useState<ISuccessResult | null>(null)
+
+	const { config } = usePrepareContractWrite({
+		address: process.env.NEXT_PUBLIC_CONTRACT_ADDR as `0x${string}`,
+		abi: ReachContractAbi,
+		enabled: proof != null && address != null,
+		functionName: 'verifyAndExecute',
+		args: [
+			address!,
+			proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '').toBigInt() : BigNumber.from(0).toBigInt(),
+			proof?.nullifier_hash ? decode<BigNumber>('uint256', proof?.nullifier_hash ?? '').toBigInt() : BigNumber.from(0).toBigInt(),
+			proof?.proof
+				? decodeToBigintArray(decode<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>(
+						'uint256[8]',
+						proof?.proof ?? ''
+				  ))
+				: [
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+						BigNumber.from(0).toBigInt(),
+				  ],
+		],
+	})
+
+	const { write } = useContractWrite(config)
+
   return (
-    <Flex w="full" flexDirection={"column"} maxW="700px">
-      <Image
-        aria-label="WalletConnect"
-        src={
-          colorMode === "dark"
-            ? "/WalletConnect-white.svg"
-            : "/WalletConnect-black.svg"
-        }
-      />
-      <Heading alignSelf={"center"} textAlign={"center"} mb={6}>
-        Kent Ave Bagel Shop
-      </Heading>
-
-      <Flex flexDirection="column" gap={4}>
-        {isSubscribed ? (
-          <Flex flexDirection={"column"} alignItems="center" gap={4}>
-            <Button
-              leftIcon={<BsSendFill />}
-              variant="outline"
-              onClick={handleTestNotification}
-              isDisabled={!isW3iInitialized}
-              colorScheme="purple"
-              rounded="full"
-              isLoading={isSending}
-              loadingText="Sending..."
-            >
-              Send test notification
-            </Button>
-            <Button
-              leftIcon={isBlockNotificationEnabled ? <FaPause /> : <FaPlay />}
-              variant="outline"
-              onClick={() =>
-                setIsBlockNotificationEnabled((isEnabled) => !isEnabled)
-              }
-              isDisabled={!isW3iInitialized}
-              colorScheme={isBlockNotificationEnabled ? "orange" : "blue"}
-              rounded="full"
-            >
-              {isBlockNotificationEnabled ? "Pause" : "Resume"} block
-              notifications
-            </Button>
-            <Button
-              leftIcon={<FaBellSlash />}
-              onClick={unsubscribe}
-              variant="outline"
-              isDisabled={!isW3iInitialized || !account}
-              colorScheme="red"
-              isLoading={isUnsubscribing}
-              loadingText="Unsubscribing..."
-              rounded="full"
-            >
-              Unsubscribe
-            </Button>
-          </Flex>
-        ) : (
-          <Tooltip
-            label={
-              !Boolean(address)
-                ? "Connect your wallet first."
-                : "Register your account."
-            }
-            hidden={Boolean(account)}
+    <><main>
+      proof ? (
+					{/* <><div>
+						<h2>Proof Details:</h2>
+						<pre>{JSON.stringify(proof)}</pre>
+					</div> */}
+					<button onClick={write}>Submit Transaction</button>
+				) : (
+					<IDKitWidget
+            app_id={process.env.NEXT_PUBLIC_WLD_APP_ID!} // must be an app set to on-chain
+            action={process.env.NEXT_PUBLIC_WLD_ACTION_NAME!}
+            signal={address} // prevents tampering with a message
+            onSuccess={setProof}
+            enableTelemetry
           >
-            <Button
-              leftIcon={<FaBell />}
-              onClick={subscribe}
-              colorScheme="cyan"
-              rounded="full"
-              variant="outline"
-              w="fit-content"
-              alignSelf="center"
-              isLoading={isSubscribing}
-              loadingText="Subscribing..."
-              isDisabled={!Boolean(address) || !Boolean(account)}
-            >
-              Subscribe
-            </Button>
-          </Tooltip>
-        )}
+          {({ open }) => <button onClick={open}>Verify with World ID</button>}
+          </IDKitWidget>
+				)
+    </main>
+    <Flex w="full" flexDirection={"column"} maxW="700px">
+        <Image
+          aria-label="WalletConnect"
+          src={colorMode === "dark"
+            ? "/WalletConnect-white.svg"
+            : "/WalletConnect-black.svg"} />
+        <Heading alignSelf={"center"} textAlign={"center"} mb={6}>
+          Kent Ave Bagel Shop
+        </Heading>
 
-        {isSubscribed && (
-          <Accordion defaultIndex={[1]} allowToggle mt={10} rounded="xl">
-            <Subscription />
-            <Messages />
-            <Preferences />
-            <Subscribers />
-          </Accordion>
-        )}
-      </Flex>
-    </Flex>
+        <Flex flexDirection="column" gap={4}>
+          {isSubscribed ? (
+            <Flex flexDirection={"column"} alignItems="center" gap={4}>
+              <Button
+                leftIcon={<BsSendFill />}
+                variant="outline"
+                onClick={handleTestNotification}
+                isDisabled={!isW3iInitialized}
+                colorScheme="purple"
+                rounded="full"
+                isLoading={isSending}
+                loadingText="Sending..."
+              >
+                Send test notification
+              </Button>
+              <Button
+                leftIcon={isBlockNotificationEnabled ? <FaPause /> : <FaPlay />}
+                variant="outline"
+                onClick={() => setIsBlockNotificationEnabled((isEnabled) => !isEnabled)}
+                isDisabled={!isW3iInitialized}
+                colorScheme={isBlockNotificationEnabled ? "orange" : "blue"}
+                rounded="full"
+              >
+                {isBlockNotificationEnabled ? "Pause" : "Resume"} block
+                notifications
+              </Button>
+              <Button
+                leftIcon={<FaBellSlash />}
+                onClick={unsubscribe}
+                variant="outline"
+                isDisabled={!isW3iInitialized || !account}
+                colorScheme="red"
+                isLoading={isUnsubscribing}
+                loadingText="Unsubscribing..."
+                rounded="full"
+              >
+                Unsubscribe
+              </Button>
+            </Flex>
+          ) : (
+            <Tooltip
+              label={!Boolean(address)
+                ? "Connect your wallet first."
+                : "Register your account."}
+              hidden={Boolean(account)}
+            >
+              <Button
+                leftIcon={<FaBell />}
+                onClick={subscribe}
+                colorScheme="cyan"
+                rounded="full"
+                variant="outline"
+                w="fit-content"
+                alignSelf="center"
+                isLoading={isSubscribing}
+                loadingText="Subscribing..."
+                isDisabled={!Boolean(address) || !Boolean(account)}
+              >
+                Subscribe
+              </Button>
+            </Tooltip>
+          )}
+
+          {isSubscribed && (
+            <Accordion defaultIndex={[1]} allowToggle mt={10} rounded="xl">
+              <Subscription />
+              <Messages />
+              <Preferences />
+              <Subscribers />
+            </Accordion>
+          )}
+        </Flex>
+      </Flex></>
   );
 };
 

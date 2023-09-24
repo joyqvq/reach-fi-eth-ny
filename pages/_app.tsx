@@ -1,13 +1,41 @@
 import type { AppProps } from "next/app";
 import { ChakraProvider, Box, Flex, Grid, GridItem } from "@chakra-ui/react";
-import { WagmiConfig } from "wagmi";
+import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { baseGoerli } from "wagmi/chains";
 import { theme } from "../styles/theme";
 import Footer from "../components/core/Footer";
 import "@web3inbox/widget-react/dist/compiled.css";
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
+import { ConnectKitProvider } from 'connectkit'
+import { InjectedConnector } from 'wagmi/connectors/injected'
 
-import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
+// import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 import Navbar from "../components/core/Navbar";
+
+const { chains, publicClient } = configureChains(
+	[baseGoerli],
+	[
+	  jsonRpcProvider({
+		rpc: () => ({
+		http: 'https://summer-rough-crater.base-goerli.discover.quiknode.pro/' // 👈 Replace this with your HTTP URL from the previous step
+		}),
+	  })
+	]
+  );
+
+  const config = createConfig({
+    autoConnect: true,
+    publicClient,
+    connectors: [
+      new InjectedConnector({
+      chains,
+      options: {
+        name: 'Injected',
+        shimDisconnect: true,
+      },
+      })
+    ]
+    })
 
 // 1. Get projectID at https://cloud.walletconnect.com
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID as string;
@@ -16,20 +44,22 @@ if (!projectId) {
 }
 
 // 2. Configure Web3Modal
-const chains = [baseGoerli];
-const wagmiConfig = defaultWagmiConfig({
-  chains,
-  projectId,
-  appName: "Kent Ave Bagel Shop",
-});
+// const wagmiConfig = defaultWagmiConfig({
+//   chains,
+//   projectId,
+//   appName: "Kent Ave Bagel Shop",
+// });
 
-createWeb3Modal({ wagmiConfig, projectId, chains });
+// createWeb3Modal({ wagmiConfig: config, projectId, chains });
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <ChakraProvider theme={theme}>
-        <WagmiConfig config={wagmiConfig}>
+        <WagmiConfig config={config}>
+          {/* <ConnectKitProvider>
+				    <Component {...pageProps} />
+		      </ConnectKitProvider> */}
           <Grid
             templateAreas={`"header" "main" "footer"`}
             w="100%"
@@ -47,7 +77,9 @@ function MyApp({ Component, pageProps }: AppProps) {
                 justifyContent={"center"}
                 alignItems={"center"}
               >
+                {/* <ConnectKitProvider> */}
                 <Component {...pageProps} />
+                {/* </ConnectKitProvider> */}
               </Flex>
             </GridItem>
             <GridItem area={"footer"}>
