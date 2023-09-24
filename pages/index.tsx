@@ -30,7 +30,6 @@ import { sendNotification } from "../utils/fetchNotify";
 import Subscribers from "../components/Subscribers";
 import { BigNumber } from 'ethers'
 import { decode } from './lib/wld'
-// import { ConnectKitButton } from 'connectkit'
 import { IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
 import ReachContractAbi from './abi/ReachContract.abi'
 

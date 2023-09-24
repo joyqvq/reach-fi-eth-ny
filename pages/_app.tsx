@@ -6,7 +6,6 @@ import { theme } from "../styles/theme";
 import Footer from "../components/core/Footer";
 import "@web3inbox/widget-react/dist/compiled.css";
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { ConnectKitProvider } from 'connectkit'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 
 // import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
@@ -57,9 +56,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <ChakraProvider theme={theme}>
         <WagmiConfig config={config}>
-          {/* <ConnectKitProvider>
-				    <Component {...pageProps} />
-		      </ConnectKitProvider> */}
           <Grid
             templateAreas={`"header" "main" "footer"`}
             w="100%"
@@ -77,9 +73,7 @@ function MyApp({ Component, pageProps }: AppProps) {
                 justifyContent={"center"}
                 alignItems={"center"}
               >
-                {/* <ConnectKitProvider> */}
                 <Component {...pageProps} />
-                {/* </ConnectKitProvider> */}
               </Flex>
             </GridItem>
             <GridItem area={"footer"}>

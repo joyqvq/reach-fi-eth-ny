@@ -28,8 +28,7 @@
     "viem": "^1.10.14",
     "wagmi": "1.4.2",
     "ethers": "^5.7.2",
-    "@worldcoin/idkit": "0.5.1",
-    "connectkit": "^1.5.3"
+    "@worldcoin/idkit": "0.5.1"
   },
   "devDependencies": {
     "@types/node": "18.6.4",
