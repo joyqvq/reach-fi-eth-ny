@@ -200,11 +200,7 @@ const Home: NextPage = () => {
 
   return (
     <><main>
-      proof ? (
-					{/* <><div>
-						<h2>Proof Details:</h2>
-						<pre>{JSON.stringify(proof)}</pre>
-					</div> */}
+      {proof ? (
 					<button onClick={write}>Submit Transaction</button>
 				) : (
 					<IDKitWidget
@@ -216,7 +212,7 @@ const Home: NextPage = () => {
           >
           {({ open }) => <button onClick={open}>Verify with World ID</button>}
           </IDKitWidget>
-				)
+				)}
     </main>
     <Flex w="full" flexDirection={"column"} maxW="700px">
         <Image

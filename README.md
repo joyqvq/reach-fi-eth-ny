@@ -1,7 +1,14 @@
-# Kent Ave Bagel Shop 
-🔗 Live dapp demo - https://hackers.gm.walletconnect.com/  
-📚 WalletConnect Web3Inbox Docs - https://docs.walletconnect.com/2.0/web3inbox/core-components/usage
+# Reach Fi
+- Campaign Portal: https://reach-6932rzpsw-philipglazman.vercel.app/
+- Kent Ave Bagel Shop (Example Dapp): 
 
+# Architecture
+
+# Built with
+- Worldcoin IDKit: https://docs.worldcoin.org/id/idkit
+- WalletConnect Web3Inbox Docs - https://docs.walletconnect.com/2.0/web3inbox/core-components/usage
+- QuickNode Base RPC: https://www.quicknode.com/docs/base
+- Foundry (Deploy and debug): https://book.getfoundry.sh/forge/deploying
 ## Overview
 
 <img width="1552" alt="Screenshot 2023-09-22 at 7 29 48 PM" src="https://github.com/WalletConnect/gm-hackers/assets/26746725/7a024b35-f5c6-490d-b5a5-ba7b918514bf">
