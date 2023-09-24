@@ -1,4 +1,7 @@
 # Reach Fi
+
+Verifiable Marketing Campaign Platform for the next millions of human users.
+
 - Campaign Portal: https://reach-6932rzpsw-philipglazman.vercel.app/
 - Kent Ave Bagel Shop (Example Dapp): Run locally, visit: http://localhost:3000/
 - Deployed Worldcoin verify contract (see contracts/`ReachContract.sol`): https://goerli.basescan.org/address/0xDBc93E34bAf28d2f92FB931A44705b700B8820A2
