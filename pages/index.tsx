@@ -169,7 +169,7 @@ const Home: NextPage = () => {
         }
       />
       <Heading alignSelf={"center"} textAlign={"center"} mb={6}>
-        Web3Inbox hooks
+        Kent Ave Bagel Shop
       </Heading>
 
       <Flex flexDirection="column" gap={4}>
