@@ -1,7 +1,7 @@
 import type { AppProps } from "next/app";
 import { ChakraProvider, Box, Flex, Grid, GridItem } from "@chakra-ui/react";
 import { WagmiConfig } from "wagmi";
-import { mainnet } from "wagmi/chains";
+import { baseGoerli } from 'wagmi/chains'
 import { theme } from "../styles/theme";
 import Footer from "../components/core/Footer";
 import "@web3inbox/widget-react/dist/compiled.css";
@@ -16,11 +16,11 @@ if (!projectId) {
 }
 
 // 2. Configure Web3Modal
-const chains = [mainnet];
+const chains = [baseGoerli];
 const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId,
-  appName: "GM Hackers",
+  appName: "Kent Ave Bagel Shop",
 });
 
 createWeb3Modal({ wagmiConfig, projectId, chains });
